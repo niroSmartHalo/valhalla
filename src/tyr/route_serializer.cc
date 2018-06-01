@@ -1150,6 +1150,24 @@ travel_mode_type(const valhalla::odin::TripDirections_Maneuver& maneuver) {
   }
 }
 
+json::ArrayPtr grades(const std::list<valhalla::odin::TripPath> trip_paths) {
+  auto grades = json::array({});
+
+  for (auto path = trip_paths.begin(); path != trip_paths.end(); ++path) {
+    for (int i = 0; i < path->node_size(); i++) {
+      auto edge = path->node(i).edge();
+
+      auto grades_summary = json::map({});
+      grades_summary->emplace("grade", json::fp_t{edge.weighted_grade(), 3});
+      grades_summary->emplace("distance", json::fp_t{edge.length(), 3});
+
+      grades->emplace_back(grades_summary);
+    }
+  }
+
+  return grades;
+}
+
 json::ArrayPtr legs(const std::list<valhalla::odin::TripDirections>& directions_legs) {
 
   // TODO: multiple legs.
@@ -1459,7 +1477,9 @@ json::ArrayPtr legs(const std::list<valhalla::odin::TripDirections>& directions_
 }
 
 std::string serialize(const valhalla::odin::DirectionsOptions& directions_options,
-                      const std::list<valhalla::odin::TripDirections>& directions_legs) {
+                      const std::list<valhalla::odin::TripDirections>& directions_legs,
+                      const std::list<valhalla::odin::TripPath>& trip_paths) {
+
   // build up the json object
   auto json = json::map(
       {{"trip", json::map({{"locations", locations(directions_legs)},
@@ -1476,6 +1496,9 @@ std::string serialize(const valhalla::odin::DirectionsOptions& directions_option
     json->emplace("id", directions_options.id());
   }
 
+  if (directions_options.grades()) {
+    json->emplace("grades", grades(trip_paths));
+  }
   std::stringstream ss;
   ss << *json;
   return ss.str();
@@ -2281,7 +2304,7 @@ std::string serializeDirections(const valhalla_request_t& request,
     case DirectionsOptions_Format_gpx:
       return pathToGPX(path_legs);
     case DirectionsOptions_Format_json:
-      return valhalla_serializers::serialize(request.options, directions_legs);
+      return (valhalla_serializers::serialize(request.options, directions_legs, path_legs));
     default:
       throw;
   }

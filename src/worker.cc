@@ -400,7 +400,7 @@ void from_json(rapidjson::Document& doc, odin::DirectionsOptions& options) {
   auto deprecated = get_child_optional(doc, "/directions_options");
   auto& allocator = doc.GetAllocator();
   if (deprecated) {
-    for (const auto& key : {"/units", "/narrative", "/format", "/language"}) {
+    for (const auto& key : {"/units", "/narrative", "/format", "/language", "/grades"}) {
       auto child = rapidjson::get_child_optional(*deprecated, key);
       if (child) {
         doc.AddMember(rapidjson::Value(&key[1], allocator), *child, allocator);
@@ -414,6 +414,11 @@ void from_json(rapidjson::Document& doc, odin::DirectionsOptions& options) {
   odin::DirectionsOptions::Format format;
   if (fmt && odin::DirectionsOptions::Format_Parse(*fmt, &format)) {
     options.set_format(format);
+  }
+
+  auto grades = rapidjson::get_optional<bool>(doc, "/grades");
+  if(grades) {
+    options.set_grades(*grades);
   }
 
   auto id = rapidjson::get_optional<std::string>(doc, "/id");
