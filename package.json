@@ -1,14 +1,14 @@
 {
   "name": "valhalla",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "directories": {
     "doc": "docs",
     "test": "test"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-pre-gyp install --fallback-to-build=false || ./scripts/node_install.sh"
+    "install": "./scripts/node_install.sh"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "url": "https://github.com/valhalla/valhalla/issues"
   },
   "homepage": "https://github.com/valhalla/valhalla#readme",
-  "main": "lib/index.js",
   "dependencies": {
     "node-cmake": "^2.5.1",
     "node-pre-gyp": "^0.10.0"
